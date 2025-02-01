@@ -1,12 +1,12 @@
 /* 6,7, 8, 9, 10, 11 */
 // Motor A connections
-int enA = 9;
-int in1 = 8;
-int in2 = 7;
+int enA = 11;
+int in1 = 10;
+int in2 = 9;
 // Motor B connections
-int enB = 3;
-int in3 = 5;
-int in4 = 4;
+int enB = 8;
+int in3 = 7;
+int in4 = 6;
 
 void setup() {
 // Set all the motor control pins to outputs
