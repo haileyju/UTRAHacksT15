@@ -30,14 +30,14 @@ void loop() {
 	// For PWM maximum possible values are 0 to 255
 	digitalWrite(enA, HIGH);
 	digitalWrite(enB, HIGH);
-  directionControl();
+  goForward();
   delay(2000);
   stopControl();
   delay(2000);
 }
 
 
-void directionControl() {
+void goForward() {
 	// Turn on motor A & B
 	digitalWrite(in1, HIGH);
 	digitalWrite(in2, LOW);
@@ -83,5 +83,4 @@ void stopControl() {
 	digitalWrite(in2, LOW);
 	digitalWrite(in3, LOW);
 	digitalWrite(in4, LOW);
-
 }
