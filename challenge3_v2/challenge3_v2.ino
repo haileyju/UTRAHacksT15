@@ -119,8 +119,8 @@ void setup() {
   Clamp.attach(servoPin);
 
   // Set motor "speed" pins high (if using PWM later, adjust accordingly)
-  digitalWrite(enA, LOW);
-  digitalWrite(enB, LOW); // return back to high later
+  digitalWrite(enA, HIGH);
+  digitalWrite(enB, HIGH); // return back to high later
 
   // Color sensor setup
   pinMode(S0, OUTPUT);
@@ -141,6 +141,7 @@ void setup() {
 // MAIN LOOP
 // ==========================
 void loop() {
+
   // If the complete pattern has been detected, stop the robot.
   if (currentIndex >= patternLength) {
     stop();
@@ -153,7 +154,9 @@ void loop() {
   
   // --- TILE DEBOUNCE / UNIQUE DETECTION LOGIC ---
   // Only register a tile once. When no color is detected, reset the flag.
-  if (detectedColor == COLOR_NONE) {
+  Serial.println(tileRegistered);
+  Serial.println(detectedColor);
+  if (detectedColor != pattern[currentIndex]) {
     tileRegistered = false;
   }
   else if (!tileRegistered) {
@@ -180,8 +183,10 @@ void loop() {
         tileRegistered = true;
         lastTileTime = millis();
         lastRegisteredColor = detectedColor;
-        blinkLED();
         currentIndex++;
+
+        blinkLED();
+
         Serial.print("Tile accepted. Pattern progress: ");
         Serial.println(currentIndex);
       }
@@ -189,22 +194,52 @@ void loop() {
   }
   
   // --- NAVIGATION & OBSTACLE AVOIDANCE ---
-  // Adjust direction based on detected color.
-  driveDirection(detectedColor);
-  
-  // Use the ultrasonic sensor to check for obstacles.
+  detectedColor = getColor();
   int currentDistance = getDistance();
-  if (currentDistance >= 10) {
-    drive(forwardMode, 1000);
+
+  if (currentDistance <= 20) {
+    stop();
+    drive(rightMode, secPerRotation * 0.25);
+    stop();
     currentDistance = getDistance();
-    if (currentDistance >= 10) {
-      drive(leftMode, secPerRotation * 0.50);
-      drive(forwardMode, 1000);
-      // Optionally adjust again based on color.
-      driveDirection(detectedColor);
-      drive(forwardMode, 1000);
+    if (currentDistance <= 20) {
+      drive (leftMode, secPerRotation * 0.50);
+      stop();
+      currentDistance = getDistance();
+      if (currentDistance <= 20) {
+        drive (leftMode, secPerRotation * 0.25);
+        stop();
+      }
     }
   }
+
+  drive(forwardMode, 250);
+  stop();
+  delay(20);
+
+  // // Adjust direction based on detected color.
+  // detectedColor = getColor();
+  // Serial.println(detectedColor);
+  // driveDirection(detectedColor);
+  
+  // // Use the ultrasonic sensor to check for obstacles.
+  // int currentDistance = getDistance();
+  // if (currentDistance >= 20) {
+  //   drive(forwardMode, 200);
+  //   detectedColor = getColor();
+  //   currentDistance = getDistance();
+  //   delay(200);
+  //   if (currentDistance >= 20) {
+  //     drive(leftMode, secPerRotation * 0.50);
+  //     drive(forwardMode, 200);
+  //     detectedColor = getColor();
+  //     // Optionally adjust again based on color.
+  //     driveDirection(detectedColor);
+  //     drive(forwardMode, 200);
+  //   }
+  // } 
+  // stop();
+  // delay (200);
 }
 
 // ==========================
@@ -221,8 +256,8 @@ void blinkLED() {
 // Adjust the robot’s driving direction based on the currently detected color.
 void driveDirection(int detectedColor) {
   if (detectedColor == COLOR_RED) {
-    // For red, perform a sharper left turn.
-    drive(leftMode, secPerRotation * 0.50);
+    // For red, perform a SLIGHT left turn.
+    drive(rightMode, secPerRotation * 0.25);
   }
   else if (detectedColor == COLOR_BLUE) {
     // For blue, perform a slight left turn.
@@ -234,66 +269,70 @@ void driveDirection(int detectedColor) {
   }
 }
 
-// Read the sensor and decide what color is being seen.
 int getColor() {
   // Read Red Pulse Width
-	redPW = getRedPW();
-	// Map to value from 0-255
-	redValue = map(redPW, redMin, redMax, 255, 0);
-	// Delay to stabilize sensor
-	delay(200);
+  redPW = getRedPW();
+  // Map to value from 0-255
+  redValue = map(redPW, redMin, redMax, 255, 0);
+  // Delay to stabilize sensor
+  delay(200);
 
-	// Read Green Pulse Width
-	greenPW = getGreenPW();
-	// Map to value from 0-255
-	greenValue = map(greenPW, greenMin, greenMax, 255, 0);
-	// Delay to stabilize sensor
-	delay(200);
+  // Read Green Pulse Width
+  greenPW = getGreenPW();
+  // Map to value from 0-255
+  greenValue = map(greenPW, greenMin, greenMax, 255, 0);
+  // Delay to stabilize sensor
+  delay(200);
 
-	// Read Blue Pulse Width
-	bluePW = getBluePW();
-	// Map to value from 0-255
-	blueValue = map(bluePW, blueMin, blueMax, 255, 0);
-	// Delay to stabilize sensor
-	delay(200);
+  // Read Blue Pulse Width
+  bluePW = getBluePW();
+  // Map to value from 0-255
+  blueValue = map(bluePW, blueMin, blueMax, 255, 0);
+  // Delay to stabilize sensor
+  delay(200);
 
-	// // Print output to Serial Monitor
-	// Serial.print("Red PW = ");
-	// Serial.print(redPW);
-	// Serial.print(" - Green PW = ");
-	// Serial.print(greenPW);
-	// Serial.print(" - Blue PW = ");
-	// Serial.println(bluePW);
+  // // Print output to Serial Monitor
+  // Serial.print("Red PW = ");
+  // Serial.print(redPW);
+  // Serial.print(" - Green PW = ");
+  // Serial.print(greenPW);
+  // Serial.print(" - Blue PW = ");
+  // Serial.println(bluePW);
 
-	// // Print output to Serial Monitor
-	// Serial.print("Red PW = ");
-	// Serial.print(redValue);
-	// Serial.print(" - Green PW = ");
-	// Serial.print(greenValue);
-	// Serial.print(" - Blue PW = ");
-	// Serial.println(blueValue);
+  // // Print output to Serial Monitor
+  // Serial.print("Red PW = ");
+  // Serial.print(redValue);
+  // Serial.print(" - Green PW = ");
+  // Serial.print(greenValue);
+  // Serial.print(" - Blue PW = ");
+  // Serial.println(blueValue);
 
-	if (redValue < 100 && blueValue < 100 && greenValue < 100) {
-		// Serial.println("Black is detected");
-		return COLOR_NONE;
-	}
-	else if (redValue > greenValue && redValue > blueValue) {
-		// Serial.println("Red is Detected");
-		return COLOR_RED;
-	}
-	else if (greenValue > blueValue && greenValue > redValue) {
-		// Serial.println("Green is Detected");
-		return COLOR_GREEN;
-	}
-	else if (blueValue > redValue && blueValue > greenValue) {
-		// Serial.println("Blue is Detected");
-		return COLOR_BLUE;
+  if (redValue < 100 && blueValue < 100 && greenValue < 100) {
+    // Serial.println("Black is detected");
+    return COLOR_NONE;
+  }
+  else if (redValue > 210 && blueValue > 210 && greenValue > 210) {
+    // Serial.println("floor is detected");
+    return COLOR_WHITE;
 
-	}
-	else {
-		//  Serial.println("Nothing is Detected"); 
-		return COLOR_WHITE;
-	}
+  }
+  else if (redValue > greenValue && redValue > blueValue) {
+    // Serial.println("Red is Detected");
+    return COLOR_RED;
+  }
+  else if (greenValue > blueValue && greenValue > redValue) {
+    // Serial.println("Green is Detected");
+    return COLOR_GREEN;
+  }
+  else if (blueValue > redValue && blueValue > greenValue) {
+    // Serial.println("Blue is Detected");
+    return COLOR_BLUE;
+
+  }
+  else {
+    //  Serial.println("Nothing is Detected"); 
+    return COLOR_WHITE;
+  }
 }
 
 // Drive the motors using the specified mode and duration.
