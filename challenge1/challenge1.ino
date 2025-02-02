@@ -215,6 +215,11 @@ int getColor() {
 		// Serial.println("Black is detected");
 		return COLOR_NONE;
 	}
+  else if (redValue > 210 && blueValue > 210 && greenValue > 210){
+    // Serial.println("floor is detected");
+    return COLOR_WHITE;
+
+  }
 	else if (redValue > greenValue && redValue > blueValue) {
 		// Serial.println("Red is Detected");
 		return COLOR_RED;
@@ -241,9 +246,10 @@ void startingSetup() {
 
   int turn[] = {HIGH, LOW, LOW, LOW};
 	while (detectedColor != COLOR_BLUE && detectedColor != COLOR_RED && detectedColor != COLOR_GREEN) {
-		drive(turn, secPerRotation * 0.1666666667);
+		drive(turn, secPerRotation * 0.1);
 		detectedColor = getColor();
-		delay(200);
+    stop();
+		delay(500);
 	}
 }
 

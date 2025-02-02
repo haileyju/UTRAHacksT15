@@ -81,6 +81,9 @@ void loop() {
 	Serial.println(blueValue);
 
   if (redValue < 50 && blueValue < 50 && greenValue < 50) Serial.println("Black is detected");
+  if (redValue > 210 && blueValue > 210 && greenValue > 210){
+    Serial.println("floor is detected");
+  }
   else if (redValue > greenValue && redValue > blueValue) Serial.println("Red is Detected");
   else if (greenValue > blueValue && greenValue > redValue) Serial.println("Green is Detected");
   else if (blueValue > redValue && blueValue > greenValue) Serial.println("Blue is Detected");
