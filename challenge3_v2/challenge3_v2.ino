@@ -36,12 +36,13 @@ int angle = 0;
 // CALIBRATION VALUES
 // ==========================
 // (These should be set using your calibration sketch)
-int redMin = 0;   // Red minimum value
-int redMax = 0;   // Red maximum value
-int greenMin = 0; // Green minimum value
-int greenMax = 0; // Green maximum value
-int blueMin = 0;  // Blue minimum value
-int blueMax = 0;  // Blue maximum value
+// *Get these from Calibration Sketch
+int redMin = 213; // Red minimum value
+int redMax = 1365; // Red maximum value
+int greenMin = 207; // Green minimum value
+int greenMax = 1243; // Green maximum value
+int blueMin = 180; // Blue minimum value
+int blueMax = 1204; // Blue maximum value
 
 // ==========================
 // COLOR CONSTANTS & PATTERN
@@ -52,6 +53,7 @@ int blueMax = 0;  // Blue maximum value
 #define COLOR_RED   0x01  // 1 in decimal (001 in binary)
 #define COLOR_BLUE  0x02  // 2 in decimal (010 in binary)
 #define COLOR_GREEN 0x04  // 4 in decimal (100 in binary)
+#define COLOR_WHITE 0x07  // 4 in decimal (100 in binary)
 
 // The required pattern: Red -> Green -> Blue -> Green -> Blue
 const int patternLength = 5;
@@ -118,7 +120,7 @@ void setup() {
 
   // Set motor "speed" pins high (if using PWM later, adjust accordingly)
   digitalWrite(enA, LOW);
-  digitalWrite(enB, LOW);
+  digitalWrite(enB, LOW); // return back to high later
 
   // Color sensor setup
   pinMode(S0, OUTPUT);
@@ -234,47 +236,64 @@ void driveDirection(int detectedColor) {
 
 // Read the sensor and decide what color is being seen.
 int getColor() {
-  // Get red reading
-  redPW = getRedPW();
-  redValue = map(redPW, redMin, redMax, 255, 0);
-  delay(200);
-  
-  // Get green reading
-  greenPW = getGreenPW();
-  greenValue = map(greenPW, greenMin, greenMax, 255, 0);
-  delay(200);
-  
-  // Get blue reading
-  bluePW = getBluePW();
-  blueValue = map(bluePW, blueMin, blueMax, 255, 0);
-  delay(200);
-  
-  // Debug printout of pulse widths:
-  Serial.print("Red PW = ");
-  Serial.print(redPW);
-  Serial.print(" - Green PW = ");
-  Serial.print(greenPW);
-  Serial.print(" - Blue PW = ");
-  Serial.println(bluePW);
-  
-  // Determine the color based on the measured pulse widths.
-  // (Adjust the thresholds below according to your calibration.)
-  if (redPW < 100 && greenPW > 200) {
-    Serial.println("Red detected");
-    return COLOR_RED;
-  }
-  else if (greenPW < 100 && bluePW < 100) {
-    Serial.println("Green detected");
-    return COLOR_GREEN;
-  }
-  else if (bluePW < 100) {
-    Serial.println("Blue detected");
-    return COLOR_BLUE;
-  }
-  else {
-    Serial.println("No color detected");
-    return COLOR_NONE;
-  }
+  // Read Red Pulse Width
+	redPW = getRedPW();
+	// Map to value from 0-255
+	redValue = map(redPW, redMin, redMax, 255, 0);
+	// Delay to stabilize sensor
+	delay(200);
+
+	// Read Green Pulse Width
+	greenPW = getGreenPW();
+	// Map to value from 0-255
+	greenValue = map(greenPW, greenMin, greenMax, 255, 0);
+	// Delay to stabilize sensor
+	delay(200);
+
+	// Read Blue Pulse Width
+	bluePW = getBluePW();
+	// Map to value from 0-255
+	blueValue = map(bluePW, blueMin, blueMax, 255, 0);
+	// Delay to stabilize sensor
+	delay(200);
+
+	// // Print output to Serial Monitor
+	// Serial.print("Red PW = ");
+	// Serial.print(redPW);
+	// Serial.print(" - Green PW = ");
+	// Serial.print(greenPW);
+	// Serial.print(" - Blue PW = ");
+	// Serial.println(bluePW);
+
+	// // Print output to Serial Monitor
+	// Serial.print("Red PW = ");
+	// Serial.print(redValue);
+	// Serial.print(" - Green PW = ");
+	// Serial.print(greenValue);
+	// Serial.print(" - Blue PW = ");
+	// Serial.println(blueValue);
+
+	if (redValue < 100 && blueValue < 100 && greenValue < 100) {
+		// Serial.println("Black is detected");
+		return COLOR_NONE;
+	}
+	else if (redValue > greenValue && redValue > blueValue) {
+		// Serial.println("Red is Detected");
+		return COLOR_RED;
+	}
+	else if (greenValue > blueValue && greenValue > redValue) {
+		// Serial.println("Green is Detected");
+		return COLOR_GREEN;
+	}
+	else if (blueValue > redValue && blueValue > greenValue) {
+		// Serial.println("Blue is Detected");
+		return COLOR_BLUE;
+
+	}
+	else {
+		//  Serial.println("Nothing is Detected"); 
+		return COLOR_WHITE;
+	}
 }
 
 // Drive the motors using the specified mode and duration.
