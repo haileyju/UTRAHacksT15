@@ -1,148 +1,119 @@
-#define PIN_S0 0
-#define PIN_S1 1
-#define PIN_S2 2
-#define PIN_S3 3
-#define PIN_OUT 4
-/*
-const int s0 = 0;
-const int s1 = 1;
-const int s2 = 2;
-const int s3 = 3;
-const int out = 4;
-*/
-// Color values
- int red = 0;
- int green = 0;
- int blue = 0;
+// Define color sensor pins
+#define S0 0
+#define S1 1
+#define S2 2
+#define S3 3
+#define sensorOut 4
 
-// Calibration values
- int cal_min_r, cal_max_r;
- int cal_min_g, cal_max_g;
- int cal_min_b, cal_max_b;
+// Calibration Values
+// *Get these from Calibration Sketch
+int redMin = 0; // Red minimum value
+int redMax = 0; // Red maximum value
+int greenMin = 0; // Green minimum value
+int greenMax = 0; // Green maximum value
+int blueMin = 0; // Blue minimum value
+int blueMax = 0; // Blue maximum value
 
-// Function to read color sensor values
- void readColor() {
+// Variables for Color Pulse Width Measurements
+int redPW = 0;
+int greenPW = 0;
+int bluePW = 0;
 
-  digitalWrite(PIN_S2, LOW);
-  digitalWrite(PIN_S3, LOW);
-  int red = pulseIn(PIN_OUT, HIGH);
+// Variables for final Color values
+int redValue;
+int greenValue;
+int blueValue;
 
-  digitalWrite(PIN_S2, HIGH);
-  digitalWrite(PIN_S3, LOW);
-  //int blue = pulseIn(PIN_OUT, digitalRead(PIN_OUT) == HIGH ? LOW : HIGH);
-  int blue = pulseIn(PIN_OUT, HIGH);
-
-  digitalWrite(PIN_S2, LOW);
-  digitalWrite(PIN_S3, HIGH);  
-  int green = pulseIn(PIN_OUT, HIGH);
-//   digitalWrite(PIN_S2, LOW);
-//   digitalWrite(PIN_S3, LOW);
-//   int red = pulseIn(PIN_OUT, HIGH);
-
-//   digitalWrite(PIN_S2, HIGH);
-//   digitalWrite(PIN_S3, LOW);
-//   //int blue = pulseIn(PIN_OUT, digitalRead(PIN_OUT) == HIGH ? LOW : HIGH);
-//   int blue = pulseIn(PIN_OUT, HIGH);
-
-//   digitalWrite(PIN_S2, LOW);
-//   digitalWrite(PIN_S3, HIGH);  
-//   int green = pulseIn(PIN_OUT, HIGH);
-// ]
-/*
-  //int largestColour = 0;
-  for(int i = 1; i < 4; i++){
-    if((i == 1) && (red > largestColour)){
-      largestColour = red;
-    }else if((i == 2) && (blue > largestColour)){
-      largestColour = blue;
-    }else if((i == 3) && (green > largestColour))
-      largestColour = green
-  }
-  
-  if(largestColour = red){
-    return red;
-  }else if(largestColour = blue){
-    return blue;
-  }else if(largestColour = green){
-    return green;
-  }
-  */
- }
- //Calibration function
- void calibrate() {
-   Serial.println("Place BLACK object in front of sensor, then enter 'c'");
-   while (Serial.read() != 'c');  // Wait for user input
-   readColor();
-   cal_min_r = red;
-   cal_min_g = green;
-   cal_min_b = blue;
-
-   Serial.println("Place WHITE object in front of sensor, then enter 'c'");
-   while (Serial.read() != 'c');  // Wait for user input
-   readColor();
-   cal_max_r = red;
-   cal_max_g = green;
-   cal_max_b = blue;
-
-   Serial.println("Calibration completed.");
-}
-
-// Setup function
 void setup() {
-  Serial.begin(9600);
-  pinMode(PIN_S0, OUTPUT);
-  pinMode(PIN_S1, OUTPUT);
-  pinMode(PIN_S2, OUTPUT);
-  pinMode(PIN_S3, OUTPUT);
-  pinMode(PIN_OUT, INPUT);
+	// Set S0 - S3 as outputs
+	pinMode(S0, OUTPUT);
+	pinMode(S1, OUTPUT);
+	pinMode(S2, OUTPUT);
+	pinMode(S3, OUTPUT);
 
-  digitalWrite(PIN_S0, HIGH);
-  digitalWrite(PIN_S1, HIGH);
+	// Set Pulse Width scaling to 20%
+	digitalWrite(S0,HIGH);
+	digitalWrite(S1,LOW);
+
+	// Set Sensor output as input
+	pinMode(sensorOut, INPUT);
+
+	// Setup Serial Monitor
+	Serial.begin(9600);
 }
 
-// Main loop
 void loop() {
-   if (Serial.read() == 'c') {
-     calibrate();
-  }
+	// Read Red Pulse Width
+	redPW = getRedPW();
+  // Map to value from 0-255
+  redValue = map(redPW, redMin,redMax,255,0);
+	// Delay to stabilize sensor
+	delay(200);
 
-   //readColor();
+	// Read Green Pulse Width
+	greenPW = getGreenPW();
+  // Map to value from 0-255
+  greenValue = map(greenPW, greenMin, greenMax,255,0);
+	// Delay to stabilize sensor
+	delay(200);
 
-  // int mappedRed = map(red, cal_min_r, cal_max_r, 255, 0);
-  // int mappedGreen = map(green, cal_min_g, cal_max_g, 255, 0);
-  // int mappedBlue = map(blue, cal_min_b, cal_max_b, 255, 0);
+	// Read Blue Pulse Width
+	bluePW = getBluePW();
+  // Map to value from 0-255
+  blueValue = map(bluePW, blueMin, blueMax,255,0);
+	// Delay to stabilize sensor
+	delay(200);
 
-  // // Constrain values between 0-255
-  // mappedRed = constrain(mappedRed, 0, 255);
-  // mappedGreen = constrain(mappedGreen, 0, 255);
-  // mappedBlue = constrain(mappedBlue, 0, 255);
+	// Print output to Serial Monitor
+	Serial.print("Red PW = ");
+	Serial.print(redPW);
+	Serial.print(" - Green PW = ");
+	Serial.print(greenPW);
+	Serial.print(" - Blue PW = ");
+	Serial.println(bluePW);
 
- // void readColor() {
-  // digitalWrite(PIN_S2, LOW);
-  // digitalWrite(PIN_S3, LOW);
-  // int red = pulseIn(PIN_OUT, HIGH);
+  if (redPW < 100) Serial.println("Red is Detected");
+  else if (greenPW < 100 && bluePW < 100) Serial.println("Green is Detected");
+  else if (bluePW < 100) Serial.println("Blue is Detected");
+  else Serial.println("Nothing is Detected");
+}
 
-  // digitalWrite(PIN_S2, HIGH);
-  // digitalWrite(PIN_S3, LOW);
-  // //int blue = pulseIn(PIN_OUT, digitalRead(PIN_OUT) == HIGH ? LOW : HIGH);
-  // int blue = pulseIn(PIN_OUT, HIGH);
 
-  // digitalWrite(PIN_S2, LOW);
-  // digitalWrite(PIN_S3, HIGH);  
-  // int green = pulseIn(PIN_OUT, HIGH);
-//]
+// Function to read Red Pulse Widths
+int getRedPW() {
+	// Set sensor to read Red only
+	digitalWrite(S2,LOW);
+	digitalWrite(S3,LOW);
+	// Define integer to represent Pulse Width
+	int PW;
+	// Read the output Pulse Width
+	PW = pulseIn(sensorOut, LOW);
+	// Return the value
+	return PW;
+}
 
-  // Print detected color
-  if (red > green && red > blue) {
-    Serial.println("r"); // Red detected
-  } 
-  else if (green > red && green > blue) {
-    Serial.println("g"); // Green detected
-  } 
-  else if (blue > red && blue > green) {
-    Serial.println("b"); // Blue detected
-  } else{
-    Serial.println("no");
-  }
-  delay(200);
+// Function to read Green Pulse Widths
+int getGreenPW() {
+	// Set sensor to read Green only
+	digitalWrite(S2,HIGH);
+	digitalWrite(S3,HIGH);
+	// Define integer to represent Pulse Width
+	int PW;
+	// Read the output Pulse Width
+	PW = pulseIn(sensorOut, LOW);
+	// Return the value
+	return PW;
+}
+
+// Function to read Blue Pulse Widths
+int getBluePW() {
+	// Set sensor to read Blue only
+	digitalWrite(S2,LOW);
+	digitalWrite(S3,HIGH);
+	// Define integer to represent Pulse Width
+	int PW;
+	// Read the output Pulse Width
+	PW = pulseIn(sensorOut, LOW);
+	// Return the value
+	return PW;
 }
