@@ -137,7 +137,7 @@ void loop() {
 
 	// Serial.println(numColorPassed);
 	if (numColorPassed > 3) {
-		Serial.println("GAME ENDED");
+		// Serial.println("GAME ENDED");
 		stop();
 		angle = 45;
 		Clamp.write(angle);
@@ -236,10 +236,13 @@ int getColor() {
 
 void startingSetup() {
 	int detectedColor = getColor();
-	while (currentColor == = 0) {
-		drive(leftMode, secPerRotation * 0.1666666667);
-		drive(forwardMode, 500);
-		currentColor = getColor();
+
+  drive(backwardMode, 100);
+
+  int turn[] = {HIGH, LOW, LOW, LOW};
+	while (detectedColor != COLOR_BLUE && detectedColor != COLOR_RED && detectedColor != COLOR_GREEN) {
+		drive(turn, secPerRotation * 0.1666666667);
+		detectedColor = getColor();
 		delay(200);
 	}
 }
