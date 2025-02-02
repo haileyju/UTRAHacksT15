@@ -117,8 +117,8 @@ void setup() {
   Clamp.attach(servoPin);
 
   // Set motor "speed" pins high (if using PWM later, adjust accordingly)
-  digitalWrite(enA, HIGH);
-  digitalWrite(enB, HIGH);
+  digitalWrite(enA, LOW);
+  digitalWrite(enB, LOW);
 
   // Color sensor setup
   pinMode(S0, OUTPUT);
@@ -259,7 +259,7 @@ int getColor() {
   
   // Determine the color based on the measured pulse widths.
   // (Adjust the thresholds below according to your calibration.)
-  if (redPW < 100) {
+  if (redPW < 100 && greenPW > 200) {
     Serial.println("Red detected");
     return COLOR_RED;
   }
