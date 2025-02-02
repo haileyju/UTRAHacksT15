@@ -7,14 +7,15 @@
 #define S3 3
 #define sensorOut 4
 
+
 // Calibration Values
 // *Get these from Calibration Sketch
-int redMin = 0; // Red minimum value
-int redMax = 0; // Red maximum value
-int greenMin = 0; // Green minimum value
-int greenMax = 0; // Green maximum value
-int blueMin = 0; // Blue minimum value
-int blueMax = 0; // Blue maximum value
+int redMin = 213; // Red minimum value
+int redMax = 1365; // Red maximum value
+int greenMin = 207; // Green minimum value
+int greenMax = 1243; // Green maximum value
+int blueMin = 180; // Blue minimum value
+int blueMax = 1204; // Blue maximum value
 
 // Variables for Color Pulse Width Measurements
 int redPW = 0;
@@ -25,7 +26,6 @@ int bluePW = 0;
 int redValue;
 int greenValue;
 int blueValue;
-
 
 /* 6,7, 8, 9, 10, 11 */
 // Motor A connections
@@ -48,8 +48,8 @@ int secPerRotation = 2800;
   red = 001
   blue = 010
   green = 100
-  none = 000
-
+  black = 000
+` white = 111
 */
 int prevColor = 000;
 int currentColor = 000;
@@ -74,8 +74,8 @@ void setup() {
   Clamp.attach(servoPin); //links servo to the pin
 
   // For PWM maximum possible values are 0 to 1
-  digitalWrite(enA, HIGH);
-  digitalWrite(enB, HIGH);
+  digitalWrite(enA, LOW);
+  digitalWrite(enB, LOW);
 
 
   // * USED FOR COLOR SETTING
@@ -91,6 +91,10 @@ void setup() {
   // Set Sensor output as input
   pinMode(sensorOut, INPUT);
 
+  // Serial.println("starting conditions");
+  // startingSetup();
+
+
 }
 
 int passedColors = 0;
@@ -104,57 +108,7 @@ int passedColors = 0;
 void loop() {
   // Set motors to maximum speed
 
-  if (passedColors == 6){
-    stop();
-    return;
-  }
-
-
-  drive(left, secPerRotation * 0.125);
-  drive(forward, 2000);
-  stop();
-
-  int detectedColor = getColor();
-
-
-  if (detectedColor != currentColor){
-    currentColor = detectedColor;
-  }
- if (currentColor != detectedColor){
-    passedColors++;
-    drive(forward, 1000);
-  }
-
-  if (prevColor == nextColor) {
-    drive(right, secPerRotation * 0.25);
-  }
-
- 
-  drive(right, secPerRotation * 0.125);
-  drive(forward, 2000);
-  stop();
-  delay(2000);
-
-
-  detectedColor = getColor();
-
-
-  if (detectedColor != currentColor){
-    currentColor = detectedColor;
-  }
- if (currentColor != detectedColor){
-    passedColors++;
-    drive(forward, 1000);
-  }
-
-  if (prevColor == nextColor) {
-    drive(left, secPerRotation * 0.25);
-  }
-
-}
-
-int getColor() {
-  	// Read Red Pulse Width
+// Read Red Pulse Width
 	redPW = getRedPW();
   // Map to value from 0-255
   redValue = map(redPW, redMin,redMax,255,0);
@@ -183,31 +137,137 @@ int getColor() {
 	Serial.print(" - Blue PW = ");
 	Serial.println(bluePW);
 
-  if (redPW < 100) {
-    Serial.println("Red is Detected");
-    return 001;
-  }
-  else if (greenPW < 100 && bluePW < 100) {
-    Serial.println("Green is Detected");
-    return 100;
-  }
-  else if (bluePW < 100){
-    Serial.println("Blue is Detected");
-    return 010;
-  } 
-  else {
-    Serial.println("Nothing is Detected");
-    return 000;
-  }
+  Serial.print("Red= ");
+	Serial.print(redValue);
+	Serial.print(" - Green = ");
+	Serial.print(greenValue);
+	Serial.print(" - Blue = ");
+	Serial.println(blueValue);
+
+  if (redValue < 50 && blueValue < 50 && greenValue < 50) Serial.println("Black is detected");
+  else if (redValue > greenValue && redValue > blueValue) Serial.println("Red is Detected");
+  else if (greenValue > blueValue && greenValue > redValue) Serial.println("Green is Detected");
+  else if (blueValue > redValue && blueValue > greenValue) Serial.println("Blue is Detected");
+  else Serial.println("Nothing is Detected");
+
+//   if (passedColors == 4){
+//     stop();
+//     return;
+//   }
+
+//   Serial.println(passedColors);
+
+//   // ZIG
+//   Serial.println("ZIG");
+
+//   drive(left, secPerRotation * 0.125);
+//   drive(forward, 1000);
+//   stop();
+//   delay(5000);
+
+
+//   Serial.println("Detect color 1");
+
+//   int detectedColor = getColor();
+
+//   if (detectedColor == 000) {
+//     drive(right, secPerRotation * 0.25);
+//   }
+
+
+//  if (currentColor != detectedColor){
+//     prevColor = currentColor;
+//     currentColor = detectedColor;
+//     passedColors++;
+//     drive(left, secPerRotation * 0.125);
+//     drive(forward, 1000);
+//   }
+
+//   if (prevColor == currentColor) {
+//     drive(right, secPerRotation * 0.25);
+//     drive(forward, 1000);
+//   }
+
+//   // ZAG
+//   Serial.println("ZAG");
+
+//   drive(right, secPerRotation * 0.125);
+//   drive(forward, 2000);
+//   stop();
+
+//   Serial.println("Detect color 2");
+
+//   detectedColor = getColor();
+//   if (detectedColor == 000) {
+//     drive(left, secPerRotation * 0.25);
+//   }
+
+
+//  if (currentColor != detectedColor){
+//     prevColor = currentColor;
+//     currentColor = detectedColor;
+//     passedColors++;
+//     drive(right, secPerRotation * 0.125);
+//     drive(forward, 1000);
+//   }
+
+//   if (prevColor == currentColor) {
+//     drive(left, secPerRotation * 0.25);
+//     drive(forward, 1000);
+//   }
+
+}
+
+int getColor() {
+ // Read Red Pulse Width
+  redPW = getRedPW();
+  // Map to value from 0-255
+  redValue = map(redPW, redMin,redMax,255,0);
+	// Delay to stabilize sensor
+	delay(200);
+
+	// Read Green Pulse Width
+	greenPW = getGreenPW();
+  // Map to value from 0-255
+  greenValue = map(greenPW, greenMin, greenMax,255,0);
+	// Delay to stabilize sensor
+	delay(200);
+
+	// Read Blue Pulse Width
+	bluePW = getBluePW();
+  // Map to value from 0-255
+  blueValue = map(bluePW, blueMin, blueMax,255,0);
+	// Delay to stabilize sensor
+	delay(200);
+
+	// Print output to Serial Monitor
+	Serial.print("Red PW = ");
+	Serial.print(redValue);
+	Serial.print(" - Green PW = ");
+	Serial.print(greenValue);
+	Serial.print(" - Blue PW = ");
+	Serial.println(blueValue);
+
+  if (redValue < 50 && blueValue < 50 && greenValue < 50) {Serial.println("Black is detected"); return 0;}
+  else if (redValue > greenValue && redValue > blueValue) {Serial.println("Red is Detected"); return 1;}
+  else if (greenValue > blueValue && greenValue > redValue) {Serial.println("Green is Detected"); return 10;}
+  else if (blueValue > redValue && blueValue > greenValue) {Serial.println("Blue is Detected"); return 100;}
+  else {Serial.println("Nothing is Detected"); return 111;}
 }
 
 
 void startingSetup() {
-
+  int currentColor = getColor();
+  while (currentColor == 000){
+    drive(left, secPerRotation * 0.1666666667);
+    drive(forward, 500);
+    currentColor = getColor();
+    delay(200);
+  }
 }
 
 
-void drive(int driveMode[], int d) {
+void drive(int driveMode[], float d) {
   digitalWrite(in1, driveMode[0]);
   digitalWrite(in2, driveMode[1]);
   digitalWrite(in3, driveMode[2]);

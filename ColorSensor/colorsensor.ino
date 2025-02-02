@@ -7,12 +7,12 @@
 
 // Calibration Values
 // *Get these from Calibration Sketch
-int redMin = 0; // Red minimum value
-int redMax = 0; // Red maximum value
-int greenMin = 0; // Green minimum value
-int greenMax = 0; // Green maximum value
-int blueMin = 0; // Blue minimum value
-int blueMax = 0; // Blue maximum value
+int redMin = 213; // Red minimum value
+int redMax = 1365; // Red maximum value
+int greenMin = 207; // Green minimum value
+int greenMax = 1243; // Green maximum value
+int blueMin = 180; // Blue minimum value
+int blueMax = 1204; // Blue maximum value
 
 // Variables for Color Pulse Width Measurements
 int redPW = 0;
@@ -64,7 +64,7 @@ void loop() {
 	// Delay to stabilize sensor
 	delay(200);
 
-	// Print output to Serial Monitor
+  // Print output to Serial Monitor
 	Serial.print("Red PW = ");
 	Serial.print(redPW);
 	Serial.print(" - Green PW = ");
@@ -72,9 +72,18 @@ void loop() {
 	Serial.print(" - Blue PW = ");
 	Serial.println(bluePW);
 
-  if (redPW < 100) Serial.println("Red is Detected");
-  else if (greenPW < 100 && bluePW < 100) Serial.println("Green is Detected");
-  else if (bluePW < 100) Serial.println("Blue is Detected");
+	// Print output to Serial Monitor
+	Serial.print("Red PW = ");
+	Serial.print(redValue);
+	Serial.print(" - Green PW = ");
+	Serial.print(greenValue);
+	Serial.print(" - Blue PW = ");
+	Serial.println(blueValue);
+
+  if (redValue < 50 && blueValue < 50 && greenValue < 50) Serial.println("Black is detected");
+  else if (redValue > greenValue && redValue > blueValue) Serial.println("Red is Detected");
+  else if (greenValue > blueValue && greenValue > redValue) Serial.println("Green is Detected");
+  else if (blueValue > redValue && blueValue > greenValue) Serial.println("Blue is Detected");
   else Serial.println("Nothing is Detected");
 }
 
