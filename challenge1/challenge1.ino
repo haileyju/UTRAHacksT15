@@ -120,6 +120,11 @@ void setup() {
 	Serial.begin(9600);
 	Clamp.attach(servoPin); //links servo to the pin
 
+  angle = 45;
+	Clamp.write(angle);
+  delay(500);
+	angle = 0;
+	Clamp.write(angle);
 	startingSetup();
 }
 
@@ -136,15 +141,12 @@ void loop() {
 	int detectedColor = getColor();
 
 	// Serial.println(numColorPassed);
-	if (numColorPassed > 3) {
+	if (numColorPassed > 4) {
 		// Serial.println("GAME ENDED");
 		stop();
 		angle = 45;
 		Clamp.write(angle);
-		angle = 0;
-		Clamp.write(angle);
-		angle = 45;
-		Clamp.write(angle);
+    delay(50);
 		while (true);
 	}
 
