@@ -73,11 +73,11 @@ void loop() {
 	Serial.println(bluePW);
 
 	// Print output to Serial Monitor
-	Serial.print("Red PW = ");
+	Serial.print("Red = ");
 	Serial.print(redValue);
-	Serial.print(" - Green PW = ");
+	Serial.print(" - Green = ");
 	Serial.print(greenValue);
-	Serial.print(" - Blue PW = ");
+	Serial.print(" - Blue = ");
 	Serial.println(blueValue);
 
   if (redValue < 50 && blueValue < 50 && greenValue < 50) Serial.println("Black is detected");
